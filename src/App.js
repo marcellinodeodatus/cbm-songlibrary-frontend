@@ -62,7 +62,7 @@ function App() {
   };
 
   useEffect(() => {
-    fetch("/api/songs/worship-leaders")
+    fetch("https://cbmsonglibrary-cjbgbkbgh4gpb6ct.eastus2-01.azurewebsites.net/api/songs/worship-leaders")
       .then((res) => res.json())
       .then((data) => setLeaders(data));
   }, [showAddLeader]); // refetch after adding a leader
