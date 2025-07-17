@@ -15,7 +15,7 @@ function AllSongs({
   const [songToEdit, setSongToEdit] = useState(null);
 
   useEffect(() => {
-    fetch("/api/songs/songs-with-artists")
+    fetch("https://cbmsonglibrary-cjbgbkbgh4gpb6ct.eastus2-01.azurewebsites.net/api/songs/songs-with-artists")
       .then((res) => res.json())
       .then((data) => setSongs(data));
   }, [refresh]);
