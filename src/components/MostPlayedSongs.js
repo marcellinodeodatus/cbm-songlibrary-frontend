@@ -5,9 +5,12 @@ const MostPlayedSongs = () => {
   const [songs, setSongs] = useState([]);
 
   useEffect(() => {
+    // Group by song_id, count, order by count desc, expand to get song title
     axios
-      .get("/api/songs/most-played")
-      .then((res) => setSongs(res.data))
+      .get(
+        "/data-api/rest/ServiceSongs?$apply=groupby((song_id),aggregate($count as playCount))&$orderby=playCount desc&$top=10&$expand=song"
+      )
+      .then((res) => setSongs(res.data.value || []))
       .catch((err) => console.error(err));
   }, []);
 
@@ -15,9 +18,10 @@ const MostPlayedSongs = () => {
     <div>
       <h2>Most Played Songs 2025 (All Worship Leaders)</h2>
       <ol>
-        {songs.map((song, idx) => (
+        {songs.map((item, idx) => (
           <li key={idx}>
-            <strong>{song.title}</strong> – Played {song.times_played} times
+            <strong>{item.song?.title || "Unknown"}</strong> – Played{" "}
+            {item.playCount} times
           </li>
         ))}
       </ol>
