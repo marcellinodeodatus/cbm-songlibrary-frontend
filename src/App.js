@@ -29,6 +29,14 @@ function App() {
   const [deleteLeaderId, setDeleteLeaderId] = useState(null);
   const [deleteLeaderName, setDeleteLeaderName] = useState("");
   const [logoutMessage, setLogoutMessage] = useState("");
+  const [data, setData] = useState("");
+
+  useEffect(() => {
+    (async function () {
+      const { text } = await (await fetch(`/api/message`)).json();
+      setData(text);
+    })();
+  });
 
   // Check if the user has been inactive for more than 30 minutes
   useEffect(() => {
@@ -86,6 +94,7 @@ function App() {
         justifyContent: "center",
       }}
     >
+      <div>{data}</div>
       <h1 style={{ textAlign: "center" }}>CBM Orlando Song Library</h1>
 
       <MostPlayedSongs />
