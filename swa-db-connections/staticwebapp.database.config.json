@@ -75,13 +75,13 @@
           }
         ],
         "relationships": {
-    "song": {
-      "target.entity": "Songs",
-      "source.fields": ["song_id"],
-      "target.fields": ["song_id"],
-      "cardinality": "one"
+          "song": {
+            "target.entity": "Songs",
+            "source.fields": ["song_id"],
+            "target.fields": ["song_id"],
+            "cardinality": "one"
+          }
     }
-  }
       },
       "SongArtists":{
         "source": "dbo.SongArtists",
