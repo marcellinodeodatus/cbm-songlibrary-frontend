@@ -9,10 +9,8 @@ const DeleteLeaderModal = ({ leaderId, leaderName, onClose, onDeleted }) => {
     setLoading(true);
     setMessage("");
     try {
-      const token = localStorage.getItem("adminToken");
-      await axios.delete(`/api/songs/worship-leaders/${leaderId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // DAB DELETE endpoint for deleting a row
+      await axios.delete(`/data-api/rest/WorshipLeaders/${leaderId}`);
       setMessage("Leader deleted!");
       setTimeout(() => {
         if (onDeleted) onDeleted();

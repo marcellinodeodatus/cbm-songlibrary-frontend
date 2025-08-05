@@ -15,12 +15,10 @@ const EditLeaderModal = ({ leaderId, currentName, onClose, onSaved }) => {
     }
     setLoading(true);
     try {
-      const token = localStorage.getItem("adminToken");
-      await axios.put(
-        `/api/songs/worship-leaders/${leaderId}`,
-        { name: name.trim() },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // DAB PATCH endpoint for updating a row
+      await axios.patch(`/data-api/rest/WorshipLeaders/${leaderId}`, {
+        name: name.trim(),
+      });
       setMessage("Leader updated!");
       setTimeout(() => {
         setLoading(false);

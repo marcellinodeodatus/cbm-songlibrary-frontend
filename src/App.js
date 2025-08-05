@@ -72,7 +72,7 @@ function App() {
   useEffect(() => {
     fetch(`/data-api/rest/WorshipLeaders`)
       .then((res) => res.json())
-      .then((data) => setLeaders(data));
+      .then((data) => setLeaders(data.value || []));
   }, [showAddLeader]); // refetch after adding a leader
 
   useEffect(() => {
