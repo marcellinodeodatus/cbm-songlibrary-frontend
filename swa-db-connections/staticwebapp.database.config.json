@@ -83,15 +83,29 @@
           }
         }
       },
-      "SongArtists":{
+      "SongArtists": {
         "source": "dbo.SongArtists",
         "permissions": [
-          {
-            "actions": ["*"],
-            "role": "anonymous"
-          }
-        ]
-      },
+        {
+          "actions": ["*"],
+          "role": "anonymous"
+        }
+      ],
+      "relationships": {
+        "song": {
+          "target.entity": "Songs",
+          "source.fields": ["song_id"],
+          "target.fields": ["song_id"],
+          "cardinality": "one"
+        },
+        "artist": {
+          "target.entity": "Artists",
+          "source.fields": ["artist_id"],
+          "target.fields": ["artist_id"],
+          "cardinality": "one"
+        }
+      }
+    },
       "Songs":{
         "source": "dbo.Songs",
         "permissions": [

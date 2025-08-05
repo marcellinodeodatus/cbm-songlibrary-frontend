@@ -29,14 +29,17 @@ function App() {
   const [deleteLeaderId, setDeleteLeaderId] = useState(null);
   const [deleteLeaderName, setDeleteLeaderName] = useState("");
   const [logoutMessage, setLogoutMessage] = useState("");
-  const [data, setData] = useState("");
+
+  // start new
+  const [songsWithArtists, setSongsWithArtists] = useState([]);
 
   useEffect(() => {
-    (async function () {
-      const { text } = await (await fetch(`/api/message`)).json();
-      setData(text);
-    })();
-  });
+    fetch(
+      "/data-api/rest/SongArtists?$expand=song($select=title),artist($select=name)"
+    )
+      .then((res) => res.json())
+      .then((data) => setSongsWithArtists(data.value || []));
+  }, []);
 
   // Check if the user has been inactive for more than 30 minutes
   useEffect(() => {
@@ -94,8 +97,20 @@ function App() {
         justifyContent: "center",
       }}
     >
-      <div>{data}</div>
       <h1 style={{ textAlign: "center" }}>CBM Orlando Song Library</h1>
+
+      <div style={{ margin: "2rem 0" }}>
+        <h2>All Songs with Artists</h2>
+        <ul>
+          {songsWithArtists.map((item, idx) => (
+            <li key={idx}>
+              <strong>{item.song?.title || "Unknown Song"}</strong>
+              {" by "}
+              <span>{item.artist?.name || "Unknown Artist"}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <MostPlayedSongs />
 
