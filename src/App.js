@@ -70,7 +70,7 @@ function App() {
   };
 
   useEffect(() => {
-    fetch(`/api/songs/worship-leaders`)
+    fetch(`/data-api/rest/WorshipLeaders`)
       .then((res) => res.json())
       .then((data) => setLeaders(data));
   }, [showAddLeader]); // refetch after adding a leader
