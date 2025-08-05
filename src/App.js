@@ -34,9 +34,7 @@ function App() {
   const [songsWithArtists, setSongsWithArtists] = useState([]);
 
   useEffect(() => {
-    fetch(
-      "/data-api/rest/SongArtists?$expand=song($select=title),artist($select=name)"
-    )
+    fetch("/rest/SongArtists?$expand=song($select=title),artist($select=name)")
       .then((res) => res.json())
       .then((data) => setSongsWithArtists(data.value || []));
   }, []);
