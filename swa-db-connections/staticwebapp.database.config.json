@@ -1,0 +1,116 @@
+{
+    "$schema": "https://github.com/Azure/data-api-builder/releases/download/v1.3.19/dab.draft.schema.json",
+    "data-source": {
+      "database-type": "mssql",
+      "connection-string": "@env('DATABASE_CONNECTION_STRING')",
+      "options": {
+        "set-session-context": false
+      }
+    },
+    "runtime": {
+      "rest": {
+        "enabled": true,
+        "path": "/rest",
+        "request-body-strict": true
+      },
+      "graphql": {
+        "enabled": true,
+        "path": "/graphql",
+        "allow-introspection": true
+      },
+      "host": {
+        "cors": {
+          "origins": ["http://localhost:4280"],
+          "allow-credentials": false
+        },
+        "authentication": {
+          "provider": "StaticWebApps"
+        },
+        "mode": "development"
+      }
+    },
+    "entities": {
+      "Admins": {
+        "source": "dbo.Admins",
+        "permissions": [
+          {
+            "actions": ["*"],
+            "role": "anonymous"
+          }
+        ]
+      },
+      "Artists": {
+        "source": "dbo.Artists",
+        "permissions": [
+          {
+            "actions": ["*"],
+            "role": "anonymous"
+          }
+        ]
+      },
+      "LeaderNoTrackSongs_PreferredKeys": {
+        "source": "dbo.LeaderNoTrackSongs_PreferredKeys",
+        "permissions": [
+          {
+            "actions": ["*"],
+            "role": "anonymous"
+          }
+        ]
+      },
+      "LeaderPreferredKeys":{
+        "source": "dbo.LeaderPreferredKeys",
+        "permissions": [
+          {
+            "actions": ["*"],
+            "role": "anonymous"
+          }
+        ]
+      },
+      "ServiceSongs":{
+        "source": "dbo.ServiceSongs",
+        "permissions": [
+          {
+            "actions": ["*"],
+            "role": "anonymous"
+          }
+        ]
+      },
+      "SongArtists":{
+        "source": "dbo.SongArtists",
+        "permissions": [
+          {
+            "actions": ["*"],
+            "role": "anonymous"
+          }
+        ]
+      },
+      "Songs":{
+        "source": "dbo.Songs",
+        "permissions": [
+          {
+            "actions": ["*"],
+            "role": "anonymous"
+          }
+        ]
+      },
+      "SundayServices":{
+        "source": "dbo.SundayServices",
+        "permissions": [
+          {
+            "actions": ["*"],
+            "role": "anonymous"
+          }
+        ]
+      },
+      "WorshipLeaders":{
+        "source": "dbo.WorshipLeaders",
+        "permissions": [
+          {
+            "actions": ["*"],
+            "role": "anonymous"
+          }
+        ]
+      }
+    }
+  }
+  
