@@ -11,7 +11,10 @@ const MostPlayedSongs = () => {
         "/data-api/rest/ServiceSongs?$apply=groupby((song_id),aggregate($count as playCount))&$orderby=playCount desc&$top=10"
       )
       .then((res) => setSongs(res.data.value || []))
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error("MostPlayedSongs error:", err?.response?.data || err);
+        setSongs([]);
+      });
   }, []);
 
   return (

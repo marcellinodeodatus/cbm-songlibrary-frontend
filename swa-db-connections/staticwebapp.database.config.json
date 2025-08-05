@@ -81,7 +81,7 @@
             "target.fields": ["song_id"],
             "cardinality": "one"
           }
-    }
+        }
       },
       "SongArtists":{
         "source": "dbo.SongArtists",
