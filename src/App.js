@@ -116,7 +116,6 @@ function App() {
         return;
       }
       const songData = await songRes.json();
-      // Try to get song_id or id from response
       let newSongId = songData.song_id || songData.id;
 
       // If song_id is missing, fetch by title
@@ -151,6 +150,25 @@ function App() {
         setNewSongTitle("");
         setSelectedArtistId("");
         setShowAddSong(false);
+
+        // Refresh the song list after adding
+        (async () => {
+          const [sa, songs, artists] = await Promise.all([
+            fetchAll("/data-api/rest/SongArtists"),
+            fetchAll("/data-api/rest/Songs"),
+            fetchAll("/data-api/rest/Artists"),
+          ]);
+          const songMap = {};
+          const artistMap = {};
+          songs.forEach((s) => (songMap[s.song_id] = s.title));
+          artists.forEach((a) => (artistMap[a.artist_id] = a.name));
+          let joined = sa.map((item) => ({
+            title: songMap[item.song_id] || "Unknown Song",
+            artist: artistMap[item.artist_id] || "Unknown Artist",
+          }));
+          joined.sort((a, b) => a.title.localeCompare(b.title));
+          setSongsWithArtists(joined);
+        })();
       } else {
         const err = await saRes.json();
         setAddSongMessage(
