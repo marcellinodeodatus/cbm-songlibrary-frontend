@@ -3,6 +3,9 @@ import React, { useState, useEffect } from "react";
 function App() {
   const [songsWithArtists, setSongsWithArtists] = useState([]);
   const [selectedLetter, setSelectedLetter] = useState("");
+  const [showAddArtist, setShowAddArtist] = useState(false);
+  const [newArtistName, setNewArtistName] = useState("");
+  const [addArtistMessage, setAddArtistMessage] = useState("");
 
   async function fetchAll(endpoint) {
     let all = [];
@@ -57,6 +60,33 @@ function App() {
           (item) => item.title[0]?.toUpperCase() === selectedLetter
         );
 
+  // Add artist handler
+  const handleAddArtist = async (e) => {
+    e.preventDefault();
+    setAddArtistMessage("");
+    if (!newArtistName.trim()) {
+      setAddArtistMessage("Artist name cannot be empty.");
+      return;
+    }
+    try {
+      const res = await fetch("/data-api/rest/Artists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newArtistName.trim() }),
+      });
+      if (res.ok) {
+        setAddArtistMessage("Artist added!");
+        setNewArtistName("");
+        setShowAddArtist(false);
+      } else {
+        const err = await res.json();
+        setAddArtistMessage(err.error?.message || "Failed to add artist.");
+      }
+    } catch {
+      setAddArtistMessage("Failed to add artist.");
+    }
+  };
+
   return (
     <div
       className="App"
@@ -71,6 +101,26 @@ function App() {
       }}
     >
       <h1 style={{ textAlign: "center" }}>Song Library</h1>
+      <button onClick={() => setShowAddArtist((v) => !v)}>
+        {showAddArtist ? "Cancel" : "Add New Artist"}
+      </button>
+      {showAddArtist && (
+        <form onSubmit={handleAddArtist} style={{ margin: "1rem 0" }}>
+          <input
+            type="text"
+            value={newArtistName}
+            onChange={(e) => setNewArtistName(e.target.value)}
+            placeholder="Artist name"
+            style={{ marginRight: "0.5rem" }}
+          />
+          <button type="submit">Add</button>
+          {addArtistMessage && (
+            <div style={{ marginTop: "0.5rem", color: "green" }}>
+              {addArtistMessage}
+            </div>
+          )}
+        </form>
+      )}
       <div style={{ margin: "1rem 0" }}>
         <strong>Filter by letter:</strong>{" "}
         <button
