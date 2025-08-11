@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 
 function App() {
   const [songsWithArtists, setSongsWithArtists] = useState([]);
+  const [sortAsc, setSortAsc] = useState(true);
 
-  // Helper to fetch all paginated data from a DAB endpoint
   async function fetchAll(endpoint) {
     let all = [];
     let url = endpoint;
@@ -11,7 +11,6 @@ function App() {
       const res = await fetch(url);
       const data = await res.json();
       all = all.concat(data.value || []);
-      // Correctly replace /rest/ with /data-api/rest/
       url = data.nextLink
         ? data.nextLink.replace(/^https?:\/\/[^/]+\/rest\//, "/data-api/rest/")
         : null;
@@ -31,13 +30,21 @@ function App() {
       songs.forEach((s) => (songMap[s.song_id] = s.title));
       artists.forEach((a) => (artistMap[a.artist_id] = a.name));
 
-      const joined = sa.map((item) => ({
+      let joined = sa.map((item) => ({
         title: songMap[item.song_id] || "Unknown Song",
         artist: artistMap[item.artist_id] || "Unknown Artist",
       }));
+
+      // Sort alphabetically by song title
+      joined.sort((a, b) =>
+        sortAsc
+          ? a.title.localeCompare(b.title)
+          : b.title.localeCompare(a.title)
+      );
+
       setSongsWithArtists(joined);
     })();
-  }, []);
+  }, [sortAsc]);
 
   return (
     <div
@@ -53,6 +60,9 @@ function App() {
       }}
     >
       <h1 style={{ textAlign: "center" }}>Song Library</h1>
+      <button onClick={() => setSortAsc((prev) => !prev)}>
+        Sort {sortAsc ? "Z-A" : "A-Z"}
+      </button>
       <div style={{ margin: "2rem 0" }}>
         <h2>All Songs with Artists</h2>
         <ul>
