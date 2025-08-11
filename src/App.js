@@ -13,7 +13,7 @@ function App() {
       all = all.concat(data.value || []);
       // Remove domain from nextLink if present
       url = data.nextLink
-        ? data.nextLink.replace(/^https?:\/\/[^/]+/, "")
+        ? data.nextLink.replace(/^https?:\/\/[^/]+/, "/data-api/rest/")
         : null;
     }
     return all;
