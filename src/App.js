@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 
 function App() {
   const [songsWithArtists, setSongsWithArtists] = useState([]);
-  const [sortAsc, setSortAsc] = useState(true);
   const [selectedLetter, setSelectedLetter] = useState("");
 
   async function fetchAll(endpoint) {
@@ -36,16 +35,12 @@ function App() {
         artist: artistMap[item.artist_id] || "Unknown Artist",
       }));
 
-      // Sort alphabetically by song title
-      joined.sort((a, b) =>
-        sortAsc
-          ? a.title.localeCompare(b.title)
-          : b.title.localeCompare(a.title)
-      );
+      // Always sort alphabetically by song title (A-Z)
+      joined.sort((a, b) => a.title.localeCompare(b.title));
 
       setSongsWithArtists(joined);
     })();
-  }, [sortAsc]);
+  }, []);
 
   // Get all starting letters from song titles
   const letters = Array.from(
@@ -76,9 +71,6 @@ function App() {
       }}
     >
       <h1 style={{ textAlign: "center" }}>Song Library</h1>
-      <button onClick={() => setSortAsc((prev) => !prev)}>
-        Sort {sortAsc ? "Z-A" : "A-Z"}
-      </button>
       <div style={{ margin: "1rem 0" }}>
         <strong>Filter by letter:</strong>{" "}
         <button
@@ -104,10 +96,6 @@ function App() {
         ))}
       </div>
       <div style={{ margin: "2rem 0" }}>
-        <h2>
-          All Songs{selectedLetter ? ` starting with "${selectedLetter}"` : ""}{" "}
-          with Artists
-        </h2>
         <ul>
           {filteredSongs.map((item, idx) => (
             <li key={idx}>
