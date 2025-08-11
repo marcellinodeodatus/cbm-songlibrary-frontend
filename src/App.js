@@ -6,6 +6,11 @@ function App() {
   const [showAddArtist, setShowAddArtist] = useState(false);
   const [newArtistName, setNewArtistName] = useState("");
   const [addArtistMessage, setAddArtistMessage] = useState("");
+  const [showAddSong, setShowAddSong] = useState(false);
+  const [newSongTitle, setNewSongTitle] = useState("");
+  const [selectedArtistId, setSelectedArtistId] = useState("");
+  const [addSongMessage, setAddSongMessage] = useState("");
+  const [artistList, setArtistList] = useState([]);
 
   async function fetchAll(endpoint) {
     let all = [];
@@ -20,6 +25,11 @@ function App() {
     }
     return all;
   }
+
+  // Fetch artist list for dropdown
+  useEffect(() => {
+    fetchAll("/data-api/rest/Artists").then(setArtistList);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -38,9 +48,7 @@ function App() {
         artist: artistMap[item.artist_id] || "Unknown Artist",
       }));
 
-      // Always sort alphabetically by song title (A-Z)
       joined.sort((a, b) => a.title.localeCompare(b.title));
-
       setSongsWithArtists(joined);
     })();
   }, []);
@@ -87,6 +95,54 @@ function App() {
     }
   };
 
+  // Add song handler
+  const handleAddSong = async (e) => {
+    e.preventDefault();
+    setAddSongMessage("");
+    if (!newSongTitle.trim() || !selectedArtistId) {
+      setAddSongMessage("Song title and artist are required.");
+      return;
+    }
+    try {
+      // 1. Add song to Songs table
+      const songRes = await fetch("/data-api/rest/Songs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: newSongTitle.trim() }),
+      });
+      if (!songRes.ok) {
+        const err = await songRes.json();
+        setAddSongMessage(err.error?.message || "Failed to add song.");
+        return;
+      }
+      const songData = await songRes.json();
+      const newSongId = songData.song_id;
+
+      // 2. Add relationship to SongArtists table
+      const saRes = await fetch("/data-api/rest/SongArtists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          song_id: newSongId,
+          artist_id: parseInt(selectedArtistId, 10),
+        }),
+      });
+      if (saRes.ok) {
+        setAddSongMessage("Song added!");
+        setNewSongTitle("");
+        setSelectedArtistId("");
+        setShowAddSong(false);
+      } else {
+        const err = await saRes.json();
+        setAddSongMessage(
+          err.error?.message || "Failed to link song and artist."
+        );
+      }
+    } catch {
+      setAddSongMessage("Failed to add song.");
+    }
+  };
+
   return (
     <div
       className="App"
@@ -117,6 +173,41 @@ function App() {
           {addArtistMessage && (
             <div style={{ marginTop: "0.5rem", color: "green" }}>
               {addArtistMessage}
+            </div>
+          )}
+        </form>
+      )}
+      <button
+        onClick={() => setShowAddSong((v) => !v)}
+        style={{ marginTop: "1rem" }}
+      >
+        {showAddSong ? "Cancel" : "Add New Song"}
+      </button>
+      {showAddSong && (
+        <form onSubmit={handleAddSong} style={{ margin: "1rem 0" }}>
+          <input
+            type="text"
+            value={newSongTitle}
+            onChange={(e) => setNewSongTitle(e.target.value)}
+            placeholder="Song title"
+            style={{ marginRight: "0.5rem" }}
+          />
+          <select
+            value={selectedArtistId}
+            onChange={(e) => setSelectedArtistId(e.target.value)}
+            style={{ marginRight: "0.5rem" }}
+          >
+            <option value="">Select artist</option>
+            {artistList.map((artist) => (
+              <option key={artist.artist_id} value={artist.artist_id}>
+                {artist.name}
+              </option>
+            ))}
+          </select>
+          <button type="submit">Add Song</button>
+          {addSongMessage && (
+            <div style={{ marginTop: "0.5rem", color: "green" }}>
+              {addSongMessage}
             </div>
           )}
         </form>
