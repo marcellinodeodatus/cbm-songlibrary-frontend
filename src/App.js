@@ -293,8 +293,7 @@ function App() {
       <div style={{ margin: "2rem 0" }}>
         <h2>
           All Songs
-          {selectedLetter ? ` starting with "${selectedLetter}"` : ""} with
-          Artists
+          {selectedLetter ? ` starting with "${selectedLetter}"` : ""}
         </h2>
         <div style={{ marginBottom: "1rem" }}>
           <strong>Total songs: {filteredSongs.length}</strong>
