@@ -11,9 +11,9 @@ function App() {
       const res = await fetch(url);
       const data = await res.json();
       all = all.concat(data.value || []);
-      // Remove domain from nextLink if present
+      // Correctly replace /rest/ with /data-api/rest/
       url = data.nextLink
-        ? data.nextLink.replace(/^https?:\/\/[^/]+/, "/data-api/rest/")
+        ? data.nextLink.replace(/^https?:\/\/[^/]+\/rest\//, "/data-api/rest/")
         : null;
     }
     return all;
