@@ -11,6 +11,7 @@ function App() {
   const [selectedArtistId, setSelectedArtistId] = useState("");
   const [addSongMessage, setAddSongMessage] = useState("");
   const [artistList, setArtistList] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // <-- Add search state
 
   async function fetchAll(endpoint) {
     let all = [];
@@ -61,12 +62,19 @@ function App() {
     .sort();
 
   // Filter songs by selected letter
-  const filteredSongs =
+  let filteredSongs =
     selectedLetter === ""
       ? songsWithArtists
       : songsWithArtists.filter(
           (item) => item.title[0]?.toUpperCase() === selectedLetter
         );
+
+  // Filter by search term
+  if (searchTerm.trim() !== "") {
+    filteredSongs = filteredSongs.filter((item) =>
+      item.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
 
   // Add artist handler
   const handleAddArtist = async (e) => {
@@ -273,7 +281,24 @@ function App() {
           </button>
         ))}
       </div>
+      <div style={{ margin: "1rem 0" }}>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search song..."
+          style={{ padding: "0.5rem", width: "250px" }}
+        />
+      </div>
       <div style={{ margin: "2rem 0" }}>
+        <h2>
+          All Songs
+          {selectedLetter ? ` starting with "${selectedLetter}"` : ""} with
+          Artists
+        </h2>
+        <div style={{ marginBottom: "1rem" }}>
+          <strong>Total songs: {filteredSongs.length}</strong>
+        </div>
         <ul>
           {filteredSongs.map((item, idx) => (
             <li key={idx}>
