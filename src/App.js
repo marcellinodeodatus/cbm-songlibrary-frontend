@@ -116,7 +116,26 @@ function App() {
         return;
       }
       const songData = await songRes.json();
-      const newSongId = songData.song_id;
+      // Try to get song_id or id from response
+      let newSongId = songData.song_id || songData.id;
+
+      // If song_id is missing, fetch by title
+      if (!newSongId) {
+        const songsRes = await fetch(
+          `/data-api/rest/Songs?$filter=title eq '${newSongTitle
+            .trim()
+            .replace(/'/g, "''")}'`
+        );
+        const songsJson = await songsRes.json();
+        if (songsJson.value && songsJson.value.length > 0) {
+          newSongId = songsJson.value[0].song_id;
+        }
+      }
+
+      if (!newSongId) {
+        setAddSongMessage("Could not determine new song ID.");
+        return;
+      }
 
       // 2. Add relationship to SongArtists table
       const saRes = await fetch("/data-api/rest/SongArtists", {
