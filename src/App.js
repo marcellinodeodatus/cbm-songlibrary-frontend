@@ -11,7 +11,8 @@ function App() {
   const [selectedArtistId, setSelectedArtistId] = useState("");
   const [addSongMessage, setAddSongMessage] = useState("");
   const [artistList, setArtistList] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // <-- Add search state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showDeleteIdx, setShowDeleteIdx] = useState(null);
 
   async function fetchAll(endpoint) {
     let all = [];
@@ -365,13 +366,27 @@ function App() {
         <ul>
           {filteredSongs.map((item, idx) => (
             <li key={idx}>
-              <strong>{item.title}</strong> - {item.artist}
-              <button
-                style={{ marginLeft: "1rem", color: "red" }}
-                onClick={() => handleDeleteSongArtist(item.title, item.artist)}
+              <strong
+                style={{ cursor: "pointer", textDecoration: "underline" }}
+                onClick={() =>
+                  setShowDeleteIdx(showDeleteIdx === idx ? null : idx)
+                }
               >
-                Delete Connection
-              </button>
+                {item.title}
+              </strong>
+              {" - "}
+              {item.artist}
+              {showDeleteIdx === idx && (
+                <button
+                  style={{ marginLeft: "1rem", color: "red" }}
+                  onClick={() => {
+                    handleDeleteSongArtist(item.title, item.artist);
+                    setShowDeleteIdx(null);
+                  }}
+                >
+                  Delete Connection
+                </button>
+              )}
             </li>
           ))}
         </ul>
