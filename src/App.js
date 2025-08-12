@@ -144,10 +144,28 @@ function App() {
     }
     const artistId = artist.artist_id;
 
+    // Check if the SongArtists connection exists
+    const checkRes = await fetch(
+      `/data-api/rest/SongArtists?$filter=song_id eq ${songId} and artist_id eq ${artistId}`
+    );
+    const checkJson = await checkRes.json();
+    if (!checkJson.value || checkJson.value.length === 0) {
+      alert("Connection does not exist.");
+      return;
+    }
+
     // Delete the SongArtists connection
-    await fetch(`/data-api/rest/SongArtists/${songId},${artistId}`, {
-      method: "DELETE",
-    });
+    const delRes = await fetch(
+      `/data-api/rest/SongArtists/${songId},${artistId}`,
+      {
+        method: "DELETE",
+      }
+    );
+    if (!delRes.ok) {
+      const err = await delRes.json();
+      alert(err.error?.message || "Failed to delete connection.");
+      return;
+    }
 
     // Refresh the song list
     const [sa, songs, artists] = await Promise.all([
@@ -165,7 +183,7 @@ function App() {
     }));
     joined.sort((a, b) => a.title.localeCompare(b.title));
     setSongsWithArtists(joined);
-  }; // end handleDeleteSongArtist
+  };
 
   // Add song handler
   const handleAddSong = async (e) => {
