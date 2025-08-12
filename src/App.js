@@ -118,6 +118,55 @@ function App() {
     }
   };
 
+  // Add this function to your App component
+  const handleDeleteSongArtist = async (songTitle, artistName) => {
+    // Find song_id by title
+    const songsRes = await fetch(
+      `/data-api/rest/Songs?$filter=title eq '${songTitle.replace(/'/g, "''")}'`
+    );
+    const songsJson = await songsRes.json();
+    if (!songsJson.value || songsJson.value.length === 0) {
+      alert("Song not found.");
+      return;
+    }
+    const songId = songsJson.value[0].song_id;
+
+    // Find artist_id by name
+    const artistsRes = await fetch(
+      `/data-api/rest/Artists?$filter=tolower(name) eq '${artistName
+        .toLowerCase()
+        .replace(/'/g, "''")}'`
+    );
+    const artistsJson = await artistsRes.json();
+    if (!artistsJson.value || artistsJson.value.length === 0) {
+      alert("Artist not found.");
+      return;
+    }
+    const artistId = artistsJson.value[0].artist_id;
+
+    // Delete the SongArtists connection
+    await fetch(`/data-api/rest/SongArtists/${songId},${artistId}`, {
+      method: "DELETE",
+    });
+
+    // Refresh the song list
+    const [sa, songs, artists] = await Promise.all([
+      fetchAll("/data-api/rest/SongArtists"),
+      fetchAll("/data-api/rest/Songs"),
+      fetchAll("/data-api/rest/Artists"),
+    ]);
+    const songMap = {};
+    const artistMap = {};
+    songs.forEach((s) => (songMap[s.song_id] = s.title));
+    artists.forEach((a) => (artistMap[a.artist_id] = a.name));
+    let joined = sa.map((item) => ({
+      title: songMap[item.song_id] || "Unknown Song",
+      artist: artistMap[item.artist_id] || "Unknown Artist",
+    }));
+    joined.sort((a, b) => a.title.localeCompare(b.title));
+    setSongsWithArtists(joined);
+  };
+
   // Add song handler
   const handleAddSong = async (e) => {
     e.preventDefault();
@@ -264,6 +313,21 @@ function App() {
               </option>
             ))}
           </select>
+          <ul>
+            {filteredSongs.map((item, idx) => (
+              <li key={idx}>
+                <strong>{item.title}</strong> - {item.artist}
+                <button
+                  style={{ marginLeft: "1rem", color: "red" }}
+                  onClick={() =>
+                    handleDeleteSongArtist(item.title, item.artist)
+                  }
+                >
+                  Delete Connection
+                </button>
+              </li>
+            ))}
+          </ul>
           <button type="submit">Add Song</button>
           {addSongMessage && (
             <div style={{ marginTop: "0.5rem", color: "green" }}>
