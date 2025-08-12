@@ -371,7 +371,7 @@ function App() {
         </div>
         <div>
           {filteredSongs.map((item, idx) => (
-            <li key={idx}>
+            <div key={idx} style={{ marginBottom: "0.5rem" }}>
               <strong
                 style={{ cursor: "pointer", textDecoration: "underline" }}
                 onClick={() =>
@@ -393,7 +393,7 @@ function App() {
                   Delete
                 </button>
               )}
-            </li>
+            </div>
           ))}
         </div>
         {filteredSongs.length === 0 && (
