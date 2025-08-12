@@ -144,25 +144,14 @@ function App() {
     }
     const artistId = artist.artist_id;
 
-    // Check if the SongArtists connection exists
-    const checkRes = await fetch(
-      `/data-api/rest/SongArtists?$filter=song_id eq ${songId} and artist_id eq ${artistId}`
-    );
-    const checkJson = await checkRes.json();
-    if (!checkJson.value || checkJson.value.length === 0) {
-      alert("Connection does not exist.");
-      return;
-    }
-
-    // Delete the SongArtists connection using $filter
-    const delRes = await fetch(
-      `/data-api/rest/SongArtists/${songId},${artistId}`,
-      {
-        method: "DELETE",
-      }
-    );
-    if (!delRes.ok) {
-      const err = await delRes.json();
+    // Call the stored procedure
+    const spRes = await fetch("/data-api/rest/DeleteSongArtistConnection", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ song_id: songId, artist_id: artistId }),
+    });
+    if (!spRes.ok) {
+      const err = await spRes.json();
       alert(err.error?.message || "Failed to delete connection.");
       return;
     }

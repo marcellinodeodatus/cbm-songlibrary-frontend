@@ -132,6 +132,15 @@
             "role": "anonymous"
           }
         ]
+      },
+      "DeleteSongArtistConnection": {
+        "source": {
+          "object": "DeleteSongArtistConnection",
+          "type": "stored-procedure"
+        },
+        "permissions": [
+          { "actions": ["execute"], "role": "anonymous" }
+        ]
       }
     }
   }
