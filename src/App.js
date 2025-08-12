@@ -119,7 +119,7 @@ function App() {
     }
   };
 
-  // Add this function to your App component
+  // Delete a Song Artist Connection
   const handleDeleteSongArtist = async (songTitle, artistName) => {
     // Find song_id by title
     const songsRes = await fetch(
@@ -132,18 +132,17 @@ function App() {
     }
     const songId = songsJson.value[0].song_id;
 
-    // Find artist_id by name
-    const artistsRes = await fetch(
-      `/data-api/rest/Artists?$filter=tolower(name) eq '${artistName
-        .toLowerCase()
-        .replace(/'/g, "''")}'`
-    );
+    // Fetch all artists and match in JS (case-insensitive)
+    const artistsRes = await fetch("/data-api/rest/Artists");
     const artistsJson = await artistsRes.json();
-    if (!artistsJson.value || artistsJson.value.length === 0) {
+    const artist = (artistsJson.value || []).find(
+      (a) => a.name.toLowerCase() === artistName.toLowerCase()
+    );
+    if (!artist) {
       alert("Artist not found.");
       return;
     }
-    const artistId = artistsJson.value[0].artist_id;
+    const artistId = artist.artist_id;
 
     // Delete the SongArtists connection
     await fetch(`/data-api/rest/SongArtists/${songId},${artistId}`, {
@@ -166,7 +165,7 @@ function App() {
     }));
     joined.sort((a, b) => a.title.localeCompare(b.title));
     setSongsWithArtists(joined);
-  };
+  }; // end handleDeleteSongArtist
 
   // Add song handler
   const handleAddSong = async (e) => {
