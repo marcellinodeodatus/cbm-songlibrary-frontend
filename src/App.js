@@ -369,7 +369,7 @@ function App() {
         <div style={{ marginBottom: "1rem" }}>
           <strong>Total songs: {filteredSongs.length}</strong>
         </div>
-        <ul>
+        <div>
           {filteredSongs.map((item, idx) => (
             <li key={idx}>
               <strong
@@ -390,12 +390,12 @@ function App() {
                     setShowDeleteIdx(null);
                   }}
                 >
-                  Delete Connection
+                  Delete
                 </button>
               )}
             </li>
           ))}
-        </ul>
+        </div>
         {filteredSongs.length === 0 && (
           <div>No songs found for "{selectedLetter}"</div>
         )}
