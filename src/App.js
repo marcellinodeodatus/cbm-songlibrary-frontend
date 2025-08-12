@@ -80,20 +80,35 @@ function App() {
   const handleAddArtist = async (e) => {
     e.preventDefault();
     setAddArtistMessage("");
-    if (!newArtistName.trim()) {
+    const trimmedName = newArtistName.trim();
+    if (!trimmedName) {
       setAddArtistMessage("Artist name cannot be empty.");
       return;
     }
     try {
+      // Check if artist already exists (case-insensitive)
+      const checkRes = await fetch(
+        `/data-api/rest/Artists?$filter=tolower(name) eq '${trimmedName
+          .toLowerCase()
+          .replace(/'/g, "''")}'`
+      );
+      const checkData = await checkRes.json();
+      if (checkData.value && checkData.value.length > 0) {
+        setAddArtistMessage("Artist already exists.");
+        return;
+      }
+      // Add new artist
       const res = await fetch("/data-api/rest/Artists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newArtistName.trim() }),
+        body: JSON.stringify({ name: trimmedName }),
       });
       if (res.ok) {
         setAddArtistMessage("Artist added!");
         setNewArtistName("");
         setShowAddArtist(false);
+        // Optionally refresh artist list
+        fetchAll("/data-api/rest/Artists").then(setArtistList);
       } else {
         const err = await res.json();
         setAddArtistMessage(err.error?.message || "Failed to add artist.");
