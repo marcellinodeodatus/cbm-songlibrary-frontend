@@ -313,21 +313,6 @@ function App() {
               </option>
             ))}
           </select>
-          <ul>
-            {filteredSongs.map((item, idx) => (
-              <li key={idx}>
-                <strong>{item.title}</strong> - {item.artist}
-                <button
-                  style={{ marginLeft: "1rem", color: "red" }}
-                  onClick={() =>
-                    handleDeleteSongArtist(item.title, item.artist)
-                  }
-                >
-                  Delete Connection
-                </button>
-              </li>
-            ))}
-          </ul>
           <button type="submit">Add Song</button>
           {addSongMessage && (
             <div style={{ marginTop: "0.5rem", color: "green" }}>
@@ -381,6 +366,12 @@ function App() {
           {filteredSongs.map((item, idx) => (
             <li key={idx}>
               <strong>{item.title}</strong> - {item.artist}
+              <button
+                style={{ marginLeft: "1rem", color: "red" }}
+                onClick={() => handleDeleteSongArtist(item.title, item.artist)}
+              >
+                Delete Connection
+              </button>
             </li>
           ))}
         </ul>
