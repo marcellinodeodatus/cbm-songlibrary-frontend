@@ -70,10 +70,13 @@ function App() {
           (item) => item.title[0]?.toUpperCase() === selectedLetter
         );
 
-  // Filter by search term
+  // Filter by search term (searches both song title and artist name)
   if (searchTerm.trim() !== "") {
-    filteredSongs = filteredSongs.filter((item) =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const term = searchTerm.toLowerCase();
+    filteredSongs = filteredSongs.filter(
+      (item) =>
+        item.title.toLowerCase().includes(term) ||
+        item.artist.toLowerCase().includes(term)
     );
   }
 
@@ -357,7 +360,7 @@ function App() {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search song..."
+          placeholder="Search song or artist..."
           style={{ padding: "0.5rem", width: "250px" }}
         />
       </div>
