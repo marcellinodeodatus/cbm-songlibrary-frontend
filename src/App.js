@@ -156,7 +156,7 @@ function App() {
 
     // Delete the SongArtists connection using $filter
     const delRes = await fetch(
-      `/data-api/rest/SongArtists?$filter=song_id eq ${songId} and artist_id eq ${artistId}`,
+      `/data-api/rest/SongArtists/${songId}/${artistId}`,
       {
         method: "DELETE",
       }
