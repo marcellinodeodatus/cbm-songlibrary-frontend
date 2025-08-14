@@ -531,9 +531,14 @@ function App() {
           {filteredSongs.map((item, idx) => (
             <div key={idx} style={{ marginBottom: "0.5rem" }}>
               <strong
-                style={{ cursor: "pointer", textDecoration: "underline" }}
-                onClick={() =>
-                  setShowDeleteIdx(showDeleteIdx === idx ? null : idx)
+                style={{
+                  cursor: isLoggedIn ? "pointer" : "default",
+                  textDecoration: isLoggedIn ? "underline" : "none",
+                }}
+                onClick={
+                  isLoggedIn
+                    ? () => setShowDeleteIdx(showDeleteIdx === idx ? null : idx)
+                    : undefined
                 }
               >
                 {item.title}
