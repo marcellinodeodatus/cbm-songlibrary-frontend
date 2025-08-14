@@ -141,6 +141,15 @@
         "permissions": [
           { "actions": ["execute"], "role": "anonymous" }
         ]
+      },
+      "DeleteSongAndConnections": {
+        "source": {
+          "object": "DeleteSongAndConnections",
+          "type": "stored-procedure"
+        },
+        "permissions": [
+          { "actions": ["execute"], "role": "anonymous" }
+        ]
       }
     }
   }

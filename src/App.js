@@ -165,6 +165,39 @@ function App() {
     }
   };
 
+  const handleDeleteSong = async (songTitle) => {
+    try {
+      const res = await fetch("/data-api/rest/DeleteSongAndConnections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: songTitle }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error?.message || "Failed to delete song.");
+        return;
+      }
+      // Refresh the song list
+      const [sa, songs, artists] = await Promise.all([
+        fetchAll("/data-api/rest/SongArtists"),
+        fetchAll("/data-api/rest/Songs"),
+        fetchAll("/data-api/rest/Artists"),
+      ]);
+      const songMap = {};
+      const artistMap = {};
+      songs.forEach((s) => (songMap[s.song_id] = s.title));
+      artists.forEach((a) => (artistMap[a.artist_id] = a.name));
+      let joined = sa.map((item) => ({
+        title: songMap[item.song_id] || "Unknown Song",
+        artist: artistMap[item.artist_id] || "Unknown Artist",
+      }));
+      joined.sort((a, b) => a.title.localeCompare(b.title));
+      setSongsWithArtists(joined);
+    } catch {
+      alert("Failed to delete song.");
+    }
+  };
+
   // Delete a Song Artist Connection
   const handleDeleteSongArtist = async (songTitle, artistName) => {
     // Find song_id by title
@@ -545,17 +578,42 @@ function App() {
               </strong>
               {" - "}
               {item.artist}
-              {/* Only show delete if logged in */}
+              {/* Only show delete buttons if logged in */}
               {isLoggedIn && showDeleteIdx === idx && (
-                <button
-                  style={{ marginLeft: "1rem", color: "red" }}
-                  onClick={() => {
-                    handleDeleteSongArtist(item.title, item.artist);
-                    setShowDeleteIdx(null);
-                  }}
-                >
-                  Delete
-                </button>
+                <>
+                  <button
+                    style={{ marginLeft: "1rem", color: "red" }}
+                    onClick={() => {
+                      handleDeleteSongArtist(item.title, item.artist);
+                      setShowDeleteIdx(null);
+                    }}
+                  >
+                    Delete Connection
+                  </button>
+                  <button
+                    style={{
+                      marginLeft: "0.5rem",
+                      color: "white",
+                      background: "red",
+                      border: "none",
+                      borderRadius: "4px",
+                      padding: "0.2rem 0.7rem",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `Are you sure you want to delete the song "${item.title}" and all its artist connections?`
+                        )
+                      ) {
+                        handleDeleteSong(item.title);
+                        setShowDeleteIdx(null);
+                      }
+                    }}
+                  >
+                    Delete Song
+                  </button>
+                </>
               )}
             </div>
           ))}
