@@ -286,38 +286,39 @@ function App() {
 
   // Delete Artist
   const handleDeleteArtist = async (artistId, artistName) => {
-    // Check if artist is connected to any songs
-    const saRes = await fetch(
-      `/data-api/rest/SongArtists?$filter=artist_id eq ${artistId}`
-    );
-    const saData = await saRes.json();
-    if (saData.value && saData.value.length > 0) {
-      // Fetch all songs for this artist
-      const songIds = saData.value.map((sa) => sa.song_id);
-      const songsRes = await fetch(`/data-api/rest/Songs`);
-      const songsData = await songsRes.json();
-      const connectedSongs = (songsData.value || []).filter((song) =>
-        songIds.includes(song.song_id)
-      );
-      const songTitles = connectedSongs.map((song) => song.title).join(", ");
-      alert(
-        `Cannot delete artist "${artistName}" because they are still connected to the following song(s):\n${songTitles}`
-      );
-      return;
-    }
+    try {
+      // Call the stored procedure
+      const res = await fetch("/data-api/rest/DeleteArtistIfNoConnections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ artist_id: artistId }),
+      });
+      const result = await res.json();
 
-    // Delete the artist
-    const delRes = await fetch(`/data-api/rest/Artists/${artistId}`, {
-      method: "DELETE",
-    });
-    if (!delRes.ok) {
-      const err = await delRes.json();
-      alert(err.error?.message || "Failed to delete artist.");
-      return;
+      // If deleted === 1, artist was deleted
+      if (result[0]?.deleted === 1) {
+        fetchAll("/data-api/rest/Artists").then(setArtistList);
+        alert(`Artist "${artistName}" deleted.`);
+      } else {
+        // Fetch all songs for this artist to show user
+        const saRes = await fetch(
+          `/data-api/rest/SongArtists?$filter=artist_id eq ${artistId}`
+        );
+        const saData = await saRes.json();
+        const songIds = saData.value.map((sa) => sa.song_id);
+        const songsRes = await fetch(`/data-api/rest/Songs`);
+        const songsData = await songsRes.json();
+        const connectedSongs = (songsData.value || []).filter((song) =>
+          songIds.includes(song.song_id)
+        );
+        const songTitles = connectedSongs.map((song) => song.title).join(", ");
+        alert(
+          `Cannot delete artist "${artistName}" because they are still connected to the following song(s):\n${songTitles}`
+        );
+      }
+    } catch {
+      alert("Failed to delete artist.");
     }
-    // Refresh artist list
-    fetchAll("/data-api/rest/Artists").then(setArtistList);
-    alert(`Artist "${artistName}" deleted.`);
   };
 
   return (

@@ -150,6 +150,15 @@
         "permissions": [
           { "actions": ["execute"], "role": "anonymous" }
         ]
+      },
+      "DeleteArtistIfNoConnections": {
+        "source": {
+          "object": "DeleteArtistIfNoConnections",
+          "type": "stored-procedure"
+        },
+        "permissions": [
+          { "actions": ["execute"], "role": "anonymous" }
+        ]
       }
     }
   }
