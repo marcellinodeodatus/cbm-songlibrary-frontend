@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import bcrypt from "bcryptjs";
 
 function App() {
   const [songsWithArtists, setSongsWithArtists] = useState([]);
@@ -13,6 +14,48 @@ function App() {
   const [artistList, setArtistList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDeleteIdx, setShowDeleteIdx] = useState(null);
+  // login
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError("");
+    try {
+      // Query the Admins table for the username
+      const res = await fetch(
+        `/data-api/rest/Admins?$filter=username eq '${loginUsername.replace(
+          /'/g,
+          "''"
+        )}'`
+      );
+      const data = await res.json();
+      if (!data.value || data.value.length === 0) {
+        setLoginError("Invalid username or password.");
+        return;
+      }
+      const admin = data.value[0];
+      // Use bcryptjs to compare password
+      const match = await bcrypt.compare(loginPassword, admin.password_hash);
+      if (match) {
+        setIsLoggedIn(true);
+        setShowLogin(false);
+        setLoginUsername("");
+        setLoginPassword("");
+      } else {
+        setLoginError("Invalid username or password.");
+      }
+    } catch {
+      setLoginError("Login failed. Please try again.");
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+  };
 
   async function fetchAll(endpoint) {
     let all = [];
@@ -273,63 +316,175 @@ function App() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        position: "relative",
       }}
     >
-      <h1 style={{ textAlign: "center" }}>Song Library</h1>
-      <button onClick={() => setShowAddArtist((v) => !v)}>
-        {showAddArtist ? "Cancel" : "Add New Artist"}
-      </button>
-      {showAddArtist && (
-        <form onSubmit={handleAddArtist} style={{ margin: "1rem 0" }}>
-          <input
-            type="text"
-            value={newArtistName}
-            onChange={(e) => setNewArtistName(e.target.value)}
-            placeholder="Artist name"
-            style={{ marginRight: "0.5rem" }}
-          />
-          <button type="submit">Add</button>
-          {addArtistMessage && (
-            <div style={{ marginTop: "0.5rem", color: "green" }}>
-              {addArtistMessage}
-            </div>
-          )}
-        </form>
-      )}
-      <button
-        onClick={() => setShowAddSong((v) => !v)}
-        style={{ marginTop: "1rem" }}
-      >
-        {showAddSong ? "Cancel" : "Add New Song"}
-      </button>
-      {showAddSong && (
-        <form onSubmit={handleAddSong} style={{ margin: "1rem 0" }}>
-          <input
-            type="text"
-            value={newSongTitle}
-            onChange={(e) => setNewSongTitle(e.target.value)}
-            placeholder="Song title"
-            style={{ marginRight: "0.5rem" }}
-          />
-          <select
-            value={selectedArtistId}
-            onChange={(e) => setSelectedArtistId(e.target.value)}
-            style={{ marginRight: "0.5rem" }}
+      {/* Login/Logout Button */}
+      <div style={{ position: "absolute", top: 20, right: 30 }}>
+        {isLoggedIn ? (
+          <button
+            style={{
+              background: "#1976d2",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              padding: "0.5rem 1rem",
+              cursor: "pointer",
+            }}
+            onClick={handleLogout}
           >
-            <option value="">Select artist</option>
-            {artistList.map((artist) => (
-              <option key={artist.artist_id} value={artist.artist_id}>
-                {artist.name}
-              </option>
-            ))}
-          </select>
-          <button type="submit">Add Song</button>
-          {addSongMessage && (
-            <div style={{ marginTop: "0.5rem", color: "green" }}>
-              {addSongMessage}
+            Logout
+          </button>
+        ) : (
+          <button
+            style={{
+              background: "#1976d2",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              padding: "0.5rem 1rem",
+              cursor: "pointer",
+            }}
+            onClick={() => setShowLogin(true)}
+          >
+            Login
+          </button>
+        )}
+      </div>
+
+      {/* Login Modal */}
+      {showLogin && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <form
+            onSubmit={handleLogin}
+            style={{
+              background: "#fff",
+              padding: "2rem",
+              borderRadius: "8px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+              minWidth: "300px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem",
+            }}
+          >
+            <h2>Admin Login</h2>
+            <input
+              type="text"
+              placeholder="Username"
+              value={loginUsername}
+              onChange={(e) => setLoginUsername(e.target.value)}
+              autoFocus
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+            />
+            {loginError && <div style={{ color: "red" }}>{loginError}</div>}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "1rem",
+              }}
+            >
+              <button type="button" onClick={() => setShowLogin(false)}>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                style={{
+                  background: "#1976d2",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "0.5rem 1rem",
+                  cursor: "pointer",
+                }}
+              >
+                Login
+              </button>
             </div>
+          </form>
+        </div>
+      )}
+
+      <h1 style={{ textAlign: "center" }}>Song Library</h1>
+
+      {/* Only show add artist/song if logged in */}
+      {isLoggedIn && (
+        <>
+          <button onClick={() => setShowAddArtist((v) => !v)}>
+            {showAddArtist ? "Cancel" : "Add New Artist"}
+          </button>
+          {showAddArtist && (
+            <form onSubmit={handleAddArtist} style={{ margin: "1rem 0" }}>
+              <input
+                type="text"
+                value={newArtistName}
+                onChange={(e) => setNewArtistName(e.target.value)}
+                placeholder="Artist name"
+                style={{ marginRight: "0.5rem" }}
+              />
+              <button type="submit">Add</button>
+              {addArtistMessage && (
+                <div style={{ marginTop: "0.5rem", color: "green" }}>
+                  {addArtistMessage}
+                </div>
+              )}
+            </form>
           )}
-        </form>
+          <button
+            onClick={() => setShowAddSong((v) => !v)}
+            style={{ marginTop: "1rem" }}
+          >
+            {showAddSong ? "Cancel" : "Add New Song"}
+          </button>
+          {showAddSong && (
+            <form onSubmit={handleAddSong} style={{ margin: "1rem 0" }}>
+              <input
+                type="text"
+                value={newSongTitle}
+                onChange={(e) => setNewSongTitle(e.target.value)}
+                placeholder="Song title"
+                style={{ marginRight: "0.5rem" }}
+              />
+              <select
+                value={selectedArtistId}
+                onChange={(e) => setSelectedArtistId(e.target.value)}
+                style={{ marginRight: "0.5rem" }}
+              >
+                <option value="">Select artist</option>
+                {artistList.map((artist) => (
+                  <option key={artist.artist_id} value={artist.artist_id}>
+                    {artist.name}
+                  </option>
+                ))}
+              </select>
+              <button type="submit">Add Song</button>
+              {addSongMessage && (
+                <div style={{ marginTop: "0.5rem", color: "green" }}>
+                  {addSongMessage}
+                </div>
+              )}
+            </form>
+          )}
+        </>
       )}
       <div style={{ margin: "1rem 0" }}>
         <strong>Filter by letter:</strong>{" "}
