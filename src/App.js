@@ -165,6 +165,7 @@ function App() {
     }
   };
 
+  //
   const handleDeleteSong = async (songTitle) => {
     try {
       const res = await fetch("/data-api/rest/DeleteSongAndConnections", {
@@ -281,6 +282,42 @@ function App() {
     } catch {
       setAddSongMessage("Failed to add song.");
     }
+  };
+
+  // Delete Artist
+  const handleDeleteArtist = async (artistId, artistName) => {
+    // Check if artist is connected to any songs
+    const saRes = await fetch(
+      `/data-api/rest/SongArtists?$filter=artist_id eq ${artistId}`
+    );
+    const saData = await saRes.json();
+    if (saData.value && saData.value.length > 0) {
+      // Fetch all songs for this artist
+      const songIds = saData.value.map((sa) => sa.song_id);
+      const songsRes = await fetch(`/data-api/rest/Songs`);
+      const songsData = await songsRes.json();
+      const connectedSongs = (songsData.value || []).filter((song) =>
+        songIds.includes(song.song_id)
+      );
+      const songTitles = connectedSongs.map((song) => song.title).join(", ");
+      alert(
+        `Cannot delete artist "${artistName}" because they are still connected to the following song(s):\n${songTitles}`
+      );
+      return;
+    }
+
+    // Delete the artist
+    const delRes = await fetch(`/data-api/rest/Artists/${artistId}`, {
+      method: "DELETE",
+    });
+    if (!delRes.ok) {
+      const err = await delRes.json();
+      alert(err.error?.message || "Failed to delete artist.");
+      return;
+    }
+    // Refresh artist list
+    fetchAll("/data-api/rest/Artists").then(setArtistList);
+    alert(`Artist "${artistName}" deleted.`);
   };
 
   return (
@@ -463,6 +500,46 @@ function App() {
             </form>
           )}
         </>
+      )}
+      {/* Artist list and delete functionality */}
+      {isLoggedIn && (
+        <div style={{ margin: "2rem 0", maxWidth: 400 }}>
+          <h2>Artists</h2>
+          {artistList.map((artist) => (
+            <div
+              key={artist.artist_id}
+              style={{
+                marginBottom: "0.5rem",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <span>{artist.name}</span>
+              <button
+                style={{
+                  marginLeft: "1rem",
+                  color: "white",
+                  background: "red",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "0.2rem 0.7rem",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Are you sure you want to delete the artist "${artist.name}"?`
+                    )
+                  ) {
+                    handleDeleteArtist(artist.artist_id, artist.name);
+                  }
+                }}
+              >
+                Delete Artist
+              </button>
+            </div>
+          ))}
+        </div>
       )}
       <div style={{ margin: "1rem 0" }}>
         <strong>Filter by letter:</strong>{" "}
