@@ -198,61 +198,6 @@ function App() {
     }
   };
 
-  // Delete a Song Artist Connection
-  const handleDeleteSongArtist = async (songTitle, artistName) => {
-    // Find song_id by title
-    const songsRes = await fetch(
-      `/data-api/rest/Songs?$filter=title eq '${songTitle.replace(/'/g, "''")}'`
-    );
-    const songsJson = await songsRes.json();
-    if (!songsJson.value || songsJson.value.length === 0) {
-      alert("Song not found.");
-      return;
-    }
-    const songId = songsJson.value[0].song_id;
-
-    // Fetch all artists and match in JS (case-insensitive)
-    const artistsRes = await fetch("/data-api/rest/Artists");
-    const artistsJson = await artistsRes.json();
-    const artist = (artistsJson.value || []).find(
-      (a) => a.name.toLowerCase() === artistName.toLowerCase()
-    );
-    if (!artist) {
-      alert("Artist not found.");
-      return;
-    }
-    const artistId = artist.artist_id;
-
-    // Call the stored procedure
-    const spRes = await fetch("/data-api/rest/DeleteSongArtistConnection", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ song_id: songId, artist_id: artistId }),
-    });
-    if (!spRes.ok) {
-      const err = await spRes.json();
-      alert(err.error?.message || "Failed to delete connection.");
-      return;
-    }
-
-    // Refresh the song list
-    const [sa, songs, artists] = await Promise.all([
-      fetchAll("/data-api/rest/SongArtists"),
-      fetchAll("/data-api/rest/Songs"),
-      fetchAll("/data-api/rest/Artists"),
-    ]);
-    const songMap = {};
-    const artistMap = {};
-    songs.forEach((s) => (songMap[s.song_id] = s.title));
-    artists.forEach((a) => (artistMap[a.artist_id] = a.name));
-    let joined = sa.map((item) => ({
-      title: songMap[item.song_id] || "Unknown Song",
-      artist: artistMap[item.artist_id] || "Unknown Artist",
-    }));
-    joined.sort((a, b) => a.title.localeCompare(b.title));
-    setSongsWithArtists(joined);
-  };
-
   // Add song handler
   const handleAddSong = async (e) => {
     e.preventDefault();
@@ -580,40 +525,29 @@ function App() {
               {item.artist}
               {/* Only show delete buttons if logged in */}
               {isLoggedIn && showDeleteIdx === idx && (
-                <>
-                  <button
-                    style={{ marginLeft: "1rem", color: "red" }}
-                    onClick={() => {
-                      handleDeleteSongArtist(item.title, item.artist);
+                <button
+                  style={{
+                    marginLeft: "1rem",
+                    color: "white",
+                    background: "red",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "0.2rem 0.7rem",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Are you sure you want to delete the song "${item.title}" and all its artist connections?`
+                      )
+                    ) {
+                      handleDeleteSong(item.title);
                       setShowDeleteIdx(null);
-                    }}
-                  >
-                    Delete Connection
-                  </button>
-                  <button
-                    style={{
-                      marginLeft: "0.5rem",
-                      color: "white",
-                      background: "red",
-                      border: "none",
-                      borderRadius: "4px",
-                      padding: "0.2rem 0.7rem",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          `Are you sure you want to delete the song "${item.title}" and all its artist connections?`
-                        )
-                      ) {
-                        handleDeleteSong(item.title);
-                        setShowDeleteIdx(null);
-                      }
-                    }}
-                  >
-                    Delete Song
-                  </button>
-                </>
+                    }
+                  }}
+                >
+                  Delete Song
+                </button>
               )}
             </div>
           ))}
