@@ -540,7 +540,8 @@ function App() {
               </strong>
               {" - "}
               {item.artist}
-              {showDeleteIdx === idx && (
+              {/* Only show delete if logged in */}
+              {isLoggedIn && showDeleteIdx === idx && (
                 <button
                   style={{ marginLeft: "1rem", color: "red" }}
                   onClick={() => {
